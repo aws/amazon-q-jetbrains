@@ -1,0 +1,38 @@
+.gradle
+.intellijPlatform
+.kotlin
+out/
+target/
+.idea
+!.run/
+build/
+gradle_build/
+*.iml
+.DS_Store
+Build/
+venv/
+guitest.log
+stale_outputs_checked
+# sam build directory
+.aws-sam/
+
+# dotnet version
+global.json
+
+# local dev files
+unload-*
+jetbrains-core/bin/
+jetbrains-ultimate/bin/
+resources/bin/
+**/jetbrains-rider/**/NuGet.config
+RiderSdkPackageVersion.props
+*.Generated.cs
+core/bin
+jetbrains-gateway/bin
+jetbrains-rider/bin
+sdk-codegen/bin
+ui-tests/bin
+**/bin
+#CodeWhispererChat
+node_modules
+!mynah-ui/package-lock.json

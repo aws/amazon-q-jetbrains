@@ -1,9 +1,9 @@
 # Contributing Guidelines
 
-Thank you for your interest in contributing to our project. Whether it's a bug report, new feature, correction, or additional
+Thank you for your interest in contributing to our project. Whether it's a bug report, new feature, correction, or additional 
 documentation, we greatly value feedback and contributions from our community.
 
-Please read through this document before submitting any issues or pull requests to ensure we have all the necessary
+Please read through this document before submitting any issues or pull requests to ensure we have all the necessary 
 information to effectively respond to your bug report or contribution.
 
 
@@ -11,16 +11,41 @@ information to effectively respond to your bug report or contribution.
 
 We welcome you to use the GitHub issue tracker to report bugs or suggest features.
 
-When filing an issue, please check existing open, or recently closed, issues to make sure somebody else hasn't already
+When filing an issue, please check [existing open](https://github.com/aws/aws-toolkit-jetbrains/issues), or [recently closed](https://github.com/aws/aws-toolkit-jetbrains/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20), issues to make sure somebody else hasn't already 
 reported the issue. Please try to include as much information as you can. Details like these are incredibly useful:
 
 * A reproducible test case or series of steps
-* The version of our code being used
-* Any modifications you've made relevant to the bug
-* Anything unusual about your environment or deployment
+* The version of the plugin being used, which JetBrains IDE being used (and version)
+* Anything unusual about your environment (e.g. recently installed plugins etc.)
 
+## Building From Source
+
+### Requirements
+
+* [Java 21](https://docs.aws.amazon.com/corretto/latest/corretto-21-ug/downloads-list.html)
+* [Git](https://git-scm.com/)
+  * If you run into a build issue on first build, ensure Git is configured to handle longer paths (common with Windows - run command as Admin): `git config --system core.longpaths true`
+* .NET 6
+  * In theory, you can use a higher version, however we build with .NET 6 in CI
+  * macOS steps:
+    ```
+    brew install dotnet@6
+    ```
+  * If Gradle cannot find `dotnet`, run `./gradlew --stop` and `./gradlew projects` to reload the daemon. Note that this should be done in your terminal as invoking Gradle through the IDE will use the IDE's cached PATH.
+* It is recommended to [launch your IDE from the terminal](https://www.jetbrains.com/help/idea/working-with-the-ide-features-from-command-line.html) due to a known issue with Gradle/Java 21 where the Gradle daemon does not respect your PATH variable when the IDE is started from the desktop/Toolbox.
+
+### Instructions
+
+1. Clone the github repository.
+2. To manually build a plugin distribution, run the global task, `./gradlew buildPlugin` to build all plugins, or on specific subproject if you want a specific plugin
+   - For example, `./gradlew :plugin-toolkit:intellij-standalone:buildPlugin` will produce a plugin zip under `plugins/toolkit/intellij-standalone/build/distributions`.
+   - You can also run the `:plugin-core:buildPlugin` and `:plugin-amazonq:buildPlugin` tasks 
+   - Use the `-PideProfileName={JETBRAINS_VERSION}` option to build the plugin for a particular IDE version (e.g `./gradlew :plugin-toolkit:intellij-standalone:buildPlugin -PideProfileName=2024.1`)
+3. In your JetBrains IDE (e.g. IntelliJ) navigate to the `Plugins` preferences and select "Install Plugin from Disk...", navigate to the zip file(s) produced in step 2.
+4. You will be prompted to restart your IDE.
 
 ## Contributing via Pull Requests
+
 Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
 1. You are working against the latest source on the *main* branch.
@@ -29,31 +54,148 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 
 To send us a pull request, please:
 
-1. Fork the repository.
-2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
-3. Ensure local tests pass.
-4. Commit to your fork using clear commit messages.
-5. Send us a pull request, answering any default questions in the pull request interface.
-6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
+1. Fork the repository
+2. Modify the source; please focus on the specific change you are contributing. *(note: all changes must have associated automated tests)*
+3. Ensure local tests pass by running:
+   ```
+   ./gradlew check
+   ```
 
-GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
+4. Generate a change log entry for your change if the change is visible to users of the toolkit in their IDE.
+   ```
+   ./gradlew :newChange --console plain
+   ```
+
+   and following the prompts. Change log entries should describe the change
+   succinctly and may include Git-Flavored Markdown ([GFM](https://github.github.com/gfm/)). Reference the Github Issue # if relevant.
+5. Commit to your fork using clear commit messages. Again, reference the Issue # if relevant.
+6. Send us a pull request by completing the pull-request template.
+7. Pay attention to any automated build failures reported in the pull request.
+8. Stay involved in the conversation.
+
+GitHub provides additional documentation on [forking a repository](https://help.github.com/articles/fork-a-repo/) and 
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
+## Debugging/Running Locally
+
+To test your changes locally, you can run the project from IntelliJ or Gradle using the `runIde` tasks. Each build will download the required IDE version and 
+start it in a sandbox (isolated) configuration.
+
+### In IDE Approach (Recommended)
+
+Launch the IDE through your IntelliJ instance using the provided run configurations. 
+If ran using the Debug feature, a debugger will be auto-attached to the sandbox IDE.
+
+### Running manually
+
+  ```
+  # IntelliJ IDEA Community
+  ./gradlew :plugin-toolkit:intellij-standalone:runIde -PrunIdeVariant=IC
+  ./gradlew :plugin-amazonq:runIde -PrunIdeVariant=IC
+  ./gradlew :sandbox-all:runIde -PrunIdeVariant=IC
+
+  # IntelliJ IDEA Ultimate
+  ./gradlew :plugin-toolkit:intellij-standalone:runIde -PrunIdeVariant=IU
+  ./gradlew :plugin-amazonq:runIde -PrunIdeVariant=IU
+  ./gradlew :sandbox-all:runIde -PrunIdeVariant=IU
+
+  # Rider
+  ./gradlew :plugin-toolkit:intellij-standalone:runIde -PrunIdeVariant=RD
+  ./gradlew :plugin-amazonq:runIde -PrunIdeVariant=RD
+  ./gradlew :sandbox-all:runIde -PrunIdeVariant=RD
+
+  # Gateway
+  ./gradlew :plugin-toolkit:jetbrains-gateway:runIde
+  ```
+  - These targets download the required IDE for testing.
+
+#### Alternative IDE
+
+- To run the plugin in a **specific JetBrains IDE** (and you have it installed), specify the `ALTERNATIVE_IDE` environment variable:
+  ```
+  ALTERNATIVE_IDE=/path/to/ide ./gradlew :plugin-toolkit:intellij-standalone:runIde
+  ```
+  - This is needed to run PyCharm and WebStorm.
+  - See also `alternativeIdePath` option in the `runIde` tasks provided by the Gradle IntelliJ Plugin [documentation](https://github.com/JetBrains/gradle-intellij-plugin).
+
+## Running Tests
+
+### Unit Tests / Checkstyle
+
+These tests make no network calls and are safe for anyone to run.
+ ```
+ ./gradlew check
+ ```
+
+### Integration Tests
+
+It is **NOT** recommended for third party contributors to run these due to they create and mutate AWS resources.
+
+- Requires valid AWS credentials (take care: it will respect any credentials currently defined in your environmental variables, and fallback to your default AWS profile otherwise).
+- Requires `sam` CLI to be on your `$PATH`.
+ ```
+ ./gradlew integrationTest
+ ```
+
+### UI Tests
+
+It is **NOT** recommended for third party contributors to run these due to they create and mutate AWS resources.
+
+- Requires valid AWS credentials (take care: it will respect any credentials currently defined in your environmental variables, and fallback to your default AWS profile otherwise).
+- Requires `sam` CLI to be on your `$PATH`.
+ ```
+ ./gradlew :ui-tests:uiTestCore
+ ```
+
+#### Debug GUI tests
+
+The sandbox IDE runs with a debug port open (`5005`). In your main IDE, create a Java Remote Debug run configuration and tell it to attach to that port.
+
+If the tests run too quickly, you can tell the UI tests to wait for the debugger to attach by editing the `suspend.set(false)` to `true` in the tasks
+`RunIdeForUiTestTask` in [toolkit-intellij-subplugin Gradle plugin](buildSrc/src/main/kotlin/toolkit-intellij-subplugin.gradle.kts)
+
+### Logging
+
+- Log messages (`LOG.info`, `LOG.error()`, …) by default are written to:
+  ```
+  plugins/toolkit/intellij/build/idea-sandbox/system/log/idea.log
+  plugins/toolkit/intellij/build/idea-sandbox/system-test/logs/idea.log  # Tests
+
+  plugins/toolkit/jetbrains-gateway/build/idea-sandbox/system/logs/idea.log  # Gateway
+  ```
+- DEBUG-level log messages are skipped by default. To enable them, add the
+  following line to the _Help_ \> _Debug Log Settings_ dialog in the IDE
+  instance started by the `runIde` task:
+  ```
+  software.aws.toolkits
+  ```
+  **Please be aware that debug level logs may contain more sensitive information. It is not advisable to keep it on nor share log files that contain debug logs**
+
+## Guidelines
+
+- AWS Explorer should not have "dependencies" (such as `sam` or `cloud-debug`). It should work without needing to install extra stuff.
+- Dependencies (such as `sam` or `cloud-debug`) should fetch/install lazily, when the user interacts with a feature that requires them.
 
 ## Finding contributions to work on
-Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any 'help wanted' issues is a great place to start.
 
+Looking at the existing issues is a great way to find something to contribute on. Any of the [help wanted](https://github.com/aws/aws-toolkit-jetbrains/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issues is a great place to start.
+
+## Additional References
+
+* https://plugins.jetbrains.com/docs/intellij/kotlin.html#kotlin-standard-library
+* https://plugins.jetbrains.com/docs/intellij/welcome.html
+* https://jetbrains.design/intellij/
+* https://www.jetbrains.com/help/resharper/sdk/Rider.html
+* https://intellij-support.jetbrains.com/hc/en-us/articles/206544519-Directories-used-by-the-IDE-to-store-settings-caches-plugins-and-logs
 
 ## Code of Conduct
-This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct).
-For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact
-opensource-codeofconduct@amazon.com with any additional questions or comments.
 
-
-## Security issue notifications
-If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
-
+This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct). 
+For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact 
+[opensource-codeofconduct@amazon.com](mailto:opensource-codeofconduct@amazon.com) with any additional questions or comments.
 
 ## Licensing
 
-See the [LICENSE](LICENSE) file for our project's licensing. We will ask you to confirm the licensing of your contribution.
+See the [LICENSE](LICENSE) file for our project's licensing. We will ask you confirm the licensing of your contribution.
+
+We may ask you to sign a [Contributor License Agreement (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) for larger changes.

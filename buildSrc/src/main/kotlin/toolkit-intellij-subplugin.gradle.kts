@@ -1,0 +1,142 @@
+// Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
+import software.aws.toolkits.gradle.findFolders
+import software.aws.toolkits.gradle.intellij.IdeVersions
+import software.aws.toolkits.gradle.intellij.toolkitIntelliJ
+
+val ideProfile = IdeVersions.ideProfile(project)
+
+plugins {
+    id("toolkit-intellij-plugin")
+    id("toolkit-kotlin-conventions")
+    id("toolkit-testing")
+}
+
+// TODO: https://github.com/gradle/gradle/issues/15383
+val versionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
+// Add our source sets per IDE profile version (i.e. src-211)
+sourceSets {
+    main {
+        java.srcDirs(findFolders(project, "src", ideProfile))
+        resources.srcDirs(findFolders(project, "resources", ideProfile))
+    }
+    test {
+        java.srcDirs(findFolders(project, "tst", ideProfile))
+        resources.srcDirs(findFolders(project, "tst-resources", ideProfile))
+    }
+}
+
+configurations {
+    runtimeClasspath {
+        // IDE provides Kotlin
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "org.jetbrains.kotlinx")
+    }
+
+    configureEach {
+        // IDE provides netty
+        exclude("io.netty")
+
+        if (name.startsWith("detekt")) {
+            return@configureEach
+        }
+
+        // Exclude dependencies that ship with iDE
+        exclude(group = "org.slf4j")
+        if (!name.startsWith("kotlinCompiler") && !name.startsWith("generateModels") && !name.startsWith("rdGen")) {
+            // we want kotlinx-coroutines-debug and kotlinx-coroutines-test
+            exclude(group = "org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm")
+            exclude(group = "org.jetbrains.kotlinx", "kotlinx-coroutines-core")
+        }
+
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlinx" && requested.name.startsWith("kotlinx-coroutines")) {
+                useVersion(versionCatalog.findVersion("kotlinCoroutines").get().toString())
+                because("resolve kotlinx-coroutines version conflicts in favor of local version catalog")
+            }
+
+            if (requested.group == "org.jetbrains.kotlin" && requested.name.startsWith("kotlin")) {
+                useVersion(versionCatalog.findVersion("kotlin").get().toString())
+                because("resolve kotlin version conflicts in favor of local version catalog")
+            }
+        }
+    }
+}
+
+tasks.processResources {
+    // needed because both rider and ultimate include plugin-datagrip.xml which we are fine with
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+tasks.processTestResources {
+    // TODO how can we remove this
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+// Run after the project has been evaluated so that the extension (intellijToolkit) has been configured
+intellijPlatform {
+    // find the name of first subproject depth, or root if not applied to a subproject hierarchy
+    projectName.convention(generateSequence(project) { it.parent }.first { it.depth <= 1 }.name)
+    instrumentCode = true
+}
+
+dependencies {
+    intellijPlatform {
+        val version = toolkitIntelliJ.version()
+
+        // annoying resolution issue that we don't want to bother fixing
+        if (!project.name.contains("jetbrains-gateway")) {
+            val type = toolkitIntelliJ.ideFlavor.map { IntelliJPlatformType.fromCode(it.toString()) }
+
+            create(type, version, useInstaller = false)
+        } else {
+            create(IntelliJPlatformType.Gateway, version)
+        }
+
+        bundledPlugins(toolkitIntelliJ.productProfile().map { it.bundledPlugins })
+        plugins(toolkitIntelliJ.productProfile().map { it.marketplacePlugins })
+
+        // OAuth modules split in 2025.3 (253) - must be explicitly bundled
+        val versionStr = version.get()
+        if (versionStr.contains("253")) {
+            bundledModule("intellij.platform.collaborationTools")
+            bundledModule("intellij.platform.collaborationTools.auth.base")
+            bundledModule("intellij.platform.collaborationTools.auth")
+        }
+
+        testFramework(TestFrameworkType.Plugin.Java)
+        testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.JUnit5)
+    }
+}
+
+// https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1844
+tasks.withType<PrepareSandboxTask>().configureEach {
+    disabledPlugins.addAll(
+        "com.intellij.swagger",
+        "org.jetbrains.plugins.kotlin.jupyter",
+    )
+}
+
+tasks.jar {
+    // :plugin-toolkit:jetbrains-community results in: --plugin-toolkit-jetbrains-community-IC-<version>.jar
+    archiveBaseName.set(toolkitIntelliJ.ideFlavor.map { "${project.buildTreePath.replace(':', '-')}-$it" })
+}
+
+tasks.withType<Test>().configureEach {
+    // conflict with Docker logging impl; so bypass service loader
+    systemProperty("slf4j.provider", "org.slf4j.jul.JULServiceProvider")
+
+    systemProperty("log.dir", intellijPlatform.sandboxContainer.map { "$it-test/logs" }.get())
+    systemProperty("testDataPath", project.rootDir.resolve("testdata").absolutePath)
+    systemProperty("org.gradle.project.ideProfileName", ideProfile.name)
+}
+
+tasks.withType<JavaExec>().configureEach {
+    systemProperty("aws.toolkits.enableTelemetry", false)
+}

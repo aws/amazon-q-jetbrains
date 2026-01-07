@@ -1,0 +1,55 @@
+# To validate:
+#   cat codecov.yml | curl --data-binary @- https://codecov.io/validate
+
+codecov:
+  notify:
+    require_ci_to_pass: no
+  max_report_age: off
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        threshold: 1
+        informational: true
+      unittest:
+        threshold: 1
+        only_pulls: true
+        flags:
+          - "unittest"
+      codewhisperer:
+        target: 75%
+        paths:
+          - "**/src/software/aws/toolkits/jetbrains/services/codewhisperer/*"
+        flags:
+          - "codewhisperer"
+    patch:
+      default:
+        threshold: 1
+        only_pulls: true
+        informational: false
+      unittest:
+        threshold: 1
+        only_pulls: true
+        informational: true
+        flags:
+          - "unittest"
+    changes: no
+
+comment: false
+
+ignore:
+  - "detekt-rules/**/*"
+  - "resources/**/*"
+  - "sdk-codegen/**/*"
+  - "jetbrains-rider/**/*.Generated.kt"
+  - "**/TelemetryDefinitions.kt"
+
+flags:
+  codewhisperer:
+    paths:
+      - "**/src/software/aws/toolkits/jetbrains/services/codewhisperer/"

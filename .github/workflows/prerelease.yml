@@ -1,0 +1,130 @@
+name: Prerelease
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for release'
+        required: false
+        default: prerelease
+  push:
+    branches: [ main, feature/* ]
+
+concurrency:
+  group: ${{ github.workflow }}${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate_artifact:
+    strategy:
+      matrix:
+        build_target: [ ':plugin-core:buildPlugin', ':plugin-toolkit:intellij-standalone:buildPlugin', ':plugin-amazonq:buildPlugin' ]
+        version: [ '2024.3', '2025.1', '2025.2', '2025.3' ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Maximize Build Space
+        if: runner.os == 'Linux'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          large-packages: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.x'
+      - name: Generate artifact
+        run: |
+          ./gradlew -PideProfileName=${{ matrix.version }} ${{ matrix.build_target }}
+      - name: Fix artifact name
+        env:
+          BUILD_TARGET: "${{ matrix.build_target }}"
+          ARTIFACT_NAME: "${{ matrix.build_target }}-${{ matrix.version }}"
+        run: |
+          echo "ARTIFACT_SUBPATH=$(echo $BUILD_TARGET | sed -e 's/^:plugin-//' -e 's/:buildPlugin$//' -e 's/:/\//')" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME//:}" >> $GITHUB_ENV
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ./plugins/${{ env.ARTIFACT_SUBPATH }}/build/distributions/*.zip
+          retention-days: 1
+
+  generate_changelog:
+    runs-on: ubuntu-latest
+    env:
+      TAG_NAME: ${{ github.event.inputs.tag_name }}
+    outputs:
+      feature: ${{ steps.assign_output.outputs.feature }}
+      tagname: ${{ steps.assign_output.outputs.tagname }}
+      version: ${{ steps.assign_output.outputs.version }}
+      changes: ${{ steps.assign_output.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+      - if: github.ref_name != 'main'
+        run: |
+          TAG_NAME=${{ github.ref_name }}
+          FEAT_NAME=$(echo $TAG_NAME | sed 's/feature\///')
+          echo "FEAT_NAME=$FEAT_NAME" >> $GITHUB_ENV
+          echo "TAG_NAME=pre-$FEAT_NAME" >> $GITHUB_ENV
+      - if: github.ref_name == 'main'
+        run: |
+          echo "FEAT_NAME=" >> $GITHUB_ENV
+          echo "TAG_NAME=prerelease" >> $GITHUB_ENV
+      - name: Generate changelog
+        id: changelog
+        run: |
+          ./gradlew :createRelease :generateChangelog
+      - name: Provide the metadata to output
+        id: assign_output
+        run: |
+          echo "feature=$FEAT_NAME" >> $GITHUB_OUTPUT
+          echo "tagname=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "version=$(cat gradle.properties | grep toolkitVersion | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+          echo 'changes<<EOF' >> $GITHUB_OUTPUT
+          cat CHANGELOG.md | perl -ne 'BEGIN{$/="\n\n"} print; exit if $. == 1' >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+  publish:
+    needs: [  generate_artifact, generate_changelog ]
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      FEAT_NAME: ${{ needs.generate_changelog.outputs.feature }}
+      TAG_NAME: ${{ needs.generate_changelog.outputs.tagname }}
+      AWS_TOOLKIT_VERSION: ${{ needs.generate_changelog.outputs.version }}
+      BRANCH: ${{ github.ref_name }}
+      AWS_TOOLKIT_CHANGES: ${{ needs.generate_changelog.outputs.changes }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+      - name: Delete existing prerelease
+        # "prerelease" (main branch) or "pre-<feature>"
+        if: "env.TAG_NAME == 'prerelease' || startsWith(env.TAG_NAME, 'pre-')"
+        run: |
+          echo "SUBJECT=AWS Toolkit ${AWS_TOOLKIT_VERSION}: ${FEAT_NAME:-${TAG_NAME}}" >> $GITHUB_ENV
+          gh release delete "$TAG_NAME" --cleanup-tag --yes || true
+      - name: Publish to GitHub Releases
+        run: |
+          envsubst < "$GITHUB_WORKSPACE/.github/workflows/prerelease_notes.md" > "$RUNNER_TEMP/prerelease_notes.md"
+          gh release create "$TAG_NAME" --prerelease --notes-file "$RUNNER_TEMP/prerelease_notes.md" --title "$SUBJECT" --target $GITHUB_SHA plugin*/*.zip
+      - name: Publish XML manifest
+        run: |
+          gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" --json assets | python3 "$GITHUB_WORKSPACE/.github/workflows/generateUpdatesXml.py" - > updatePlugins.xml
+          gh release upload "$TAG_NAME" updatePlugins.xml
