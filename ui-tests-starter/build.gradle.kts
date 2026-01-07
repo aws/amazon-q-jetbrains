@@ -50,7 +50,7 @@ configurations.getByName(uiTestSource.runtimeClasspathConfigurationName) {
 
 dependencies {
     // should really be set by the BOM, but too much work to figure out right now
-    uiTestImplementation("org.kodein.di:kodein-di-jvm:7.20.2")
+    uiTestImplementation("org.kodein.di:kodein-di-jvm:7.30.0")
     uiTestImplementation(platform(libs.junit5.bom))
     uiTestImplementation(libs.junit5.jupiter)
     uiTestImplementation(libs.assertj)
