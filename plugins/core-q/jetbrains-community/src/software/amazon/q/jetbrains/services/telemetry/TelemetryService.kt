@@ -15,7 +15,7 @@ typealias TelemetryService = migration.software.amazon.q.jetbrains.telemetry.Tel
 data class MetricEventMetadata(
     val awsAccount: String = METADATA_NA,
     val awsRegion: String = METADATA_NA,
-    var awsProduct: AWSProduct = AWSProduct.AWS_TOOLKIT_FOR_JET_BRAINS,
+    var awsProduct: AWSProduct = AWSProduct.AMAZON_Q_FOR_JET_BRAINS,
     var awsVersion: String = METADATA_NA,
 )
 
