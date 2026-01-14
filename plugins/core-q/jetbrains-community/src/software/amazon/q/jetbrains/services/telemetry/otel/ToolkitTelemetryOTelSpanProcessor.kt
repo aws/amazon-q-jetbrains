@@ -25,10 +25,9 @@ class ToolkitTelemetryOTelSpanProcessor : SpanProcessor {
 
     override fun onEnd(span: ReadableSpan) {
         val data = span.toSpanData()
-        val product = data.attributes.get(PLUGIN_NAME_ATTRIBUTE_KEY)?.let { AWSProduct.fromValue(it) } ?: AWSProduct.AWS_TOOLKIT_FOR_JET_BRAINS
+        val product = data.attributes.get(PLUGIN_NAME_ATTRIBUTE_KEY)?.let { AWSProduct.fromValue(it) } ?: AWSProduct.AMAZON_Q_FOR_JET_BRAINS
         val version = tryOrNull {
             when (product) {
-                AWSProduct.AWS_TOOLKIT_FOR_JET_BRAINS -> AwsToolkit.PLUGINS_INFO[AwsPlugin.TOOLKIT]?.version
                 AWSProduct.AMAZON_Q_FOR_JET_BRAINS -> AwsToolkit.PLUGINS_INFO[AwsPlugin.Q]?.version
                 else -> null
             }
