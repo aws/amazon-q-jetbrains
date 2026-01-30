@@ -83,7 +83,7 @@ data class DefaultMetricEvent internal constructor(
         private var createTime: Instant = Instant.now()
         private var awsAccount: String = METADATA_NA
         private var awsRegion: String = METADATA_NA
-        private var awsProduct: AWSProduct = AWSProduct.AWS_TOOLKIT_FOR_JET_BRAINS
+        private var awsProduct: AWSProduct = AWSProduct.AMAZON_Q_FOR_JET_BRAINS
         private var awsVersion: String = METADATA_NA
 
         private val data: MutableCollection<MetricEvent.Datum> = mutableListOf()

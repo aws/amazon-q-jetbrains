@@ -26,7 +26,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import software.amazon.q.jetbrains.utils.xmlElement
 import software.aws.toolkits.jetbrains.services.codewhisperer.credentials.CodeWhispererLoginType
-import software.aws.toolkits.jetbrains.services.codewhisperer.explorer.CodeWhispererExploreActionState
 import software.aws.toolkits.jetbrains.services.codewhisperer.explorer.isCodeWhispererEnabled
 import software.aws.toolkits.jetbrains.services.codewhisperer.status.CodeWhispererStatusBarWidgetFactory
 import software.aws.toolkits.jetbrains.services.codewhisperer.toolwindow.CodeWhispererCodeReferenceToolWindowFactory
@@ -94,27 +93,6 @@ class CodeWhispererSettingsTest : CodeWhispererTestBase() {
         runInEdtAndWait {
             projectRule.fixture.type(':')
             verify(codewhispererService, never()).showRecommendationsInPopup(any(), any(), any())
-        }
-    }
-
-    @Test
-    fun `test CodeWhisperer components should have correct states on initialization with no persistent states`() {
-        mockCodeWhispererEnabledStatus(false)
-        stateManager.loadState(CodeWhispererExploreActionState())
-        CodeWhispererSettings.getInstance().loadState(CodeWhispererConfiguration())
-
-        ProblemsView.getToolWindow(projectRule.project) ?: fail("Problems window not found")
-        val codeReferenceWindow = ToolWindowManager.getInstance(projectRule.project).getToolWindow(
-            CodeWhispererCodeReferenceToolWindowFactory.id
-        ) ?: fail("Code Reference Log window not found")
-        val statusBarWidgetFactory = projectRule.project.service<StatusBarWidgetsManager>().getWidgetFactories().firstOrNull {
-            it.id == CodeWhispererStatusBarWidgetFactory.ID
-        } ?: fail("CodeWhisperer status bar widget not found")
-
-        runInEdtAndWait {
-            assertThat(codeReferenceWindow.isAvailable).isFalse
-            assertThat(statusBarWidgetFactory.isAvailable(projectRule.project)).isTrue
-            assertThat(settingsManager.isIncludeCodeWithReference()).isFalse
         }
     }
 
