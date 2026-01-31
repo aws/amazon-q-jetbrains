@@ -231,12 +231,12 @@ result should be cached). A good use-case for this would be `LIST_BUCKETS_BY_REG
  cached resource but be the combination of all dependent resources as well. 
 
 [1]: https://www.jetbrains.org/intellij/sdk/docs/welcome.html
-[2]: https://github.com/aws/aws-toolkit-jetbrains/blob/72ca1c96bb44955f06a729dfd41858179839efe7/jetbrains-core/src/software/aws/toolkits/jetbrains/services/lambda/upload/LambdaLineMarker.kt
+[2]: https://github.com/aws/amazon-q-jetbrains/blob/72ca1c96bb44955f06a729dfd41858179839efe7/jetbrains-core/src/software/aws/toolkits/jetbrains/services/lambda/upload/LambdaLineMarker.kt
 [3]: https://github.com/JetBrains/intellij-community/blob/master/platform/lang-api/src/com/intellij/codeInsight/daemon/LineMarkerProvider.java
 [4]: https://github.com/JetBrains/intellij-community/blob/master/platform/lang-api/src/com/intellij/codeInsight/daemon/LineMarkerProvider.java#L77
 [5]: https://github.com/google/guava/wiki/CachesExplained
-[6]: https://github.com/aws/aws-toolkit-jetbrains/blob/master/core/src/software/aws/toolkits/core/region/AwsRegion.kt
-[7]: https://github.com/aws/aws-toolkit-jetbrains/blob/master/core/src/software/aws/toolkits/core/credentials/ToolkitCredentialsProvider.kt
-[8]: https://github.com/aws/aws-toolkit-jetbrains/blob/master/jetbrains-core/src/software/aws/toolkits/jetbrains/core/AwsResourceCache.kt
+[6]: https://github.com/aws/amazon-q-jetbrains/blob/master/core/src/software/aws/toolkits/core/region/AwsRegion.kt
+[7]: https://github.com/aws/amazon-q-jetbrains/blob/master/core/src/software/aws/toolkits/core/credentials/ToolkitCredentialsProvider.kt
+[8]: https://github.com/aws/amazon-q-jetbrains/blob/master/jetbrains-core/src/software/aws/toolkits/jetbrains/core/AwsResourceCache.kt
 [9]: https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html
 [10]: https://github.com/JetBrains/intellij-community/blob/master/platform/platform-api/src/com/intellij/util/Alarm.java

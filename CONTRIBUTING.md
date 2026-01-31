@@ -11,7 +11,7 @@ information to effectively respond to your bug report or contribution.
 
 We welcome you to use the GitHub issue tracker to report bugs or suggest features.
 
-When filing an issue, please check [existing open](https://github.com/aws/aws-toolkit-jetbrains/issues), or [recently closed](https://github.com/aws/aws-toolkit-jetbrains/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20), issues to make sure somebody else hasn't already 
+When filing an issue, please check [existing open](https://github.com/aws/amazon-q-jetbrains/issues), or [recently closed](https://github.com/aws/amazon-q-jetbrains/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20), issues to make sure somebody else hasn't already 
 reported the issue. Please try to include as much information as you can. Details like these are incredibly useful:
 
 * A reproducible test case or series of steps
@@ -178,7 +178,7 @@ If the tests run too quickly, you can tell the UI tests to wait for the debugger
 
 ## Finding contributions to work on
 
-Looking at the existing issues is a great way to find something to contribute on. Any of the [help wanted](https://github.com/aws/aws-toolkit-jetbrains/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issues is a great place to start.
+Looking at the existing issues is a great way to find something to contribute on. Any of the [help wanted](https://github.com/aws/amazon-q-jetbrains/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issues is a great place to start.
 
 ## Additional References
 

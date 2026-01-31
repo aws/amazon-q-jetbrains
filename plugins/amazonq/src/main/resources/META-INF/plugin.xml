@@ -47,14 +47,14 @@
     <p><b>Free Tier</b> - create or log in with an AWS Builder ID (a personal profile from AWS).</p>
     <p><b>Pro Tier</b> - if your organization is on the Amazon Q Developer Pro tier, log in with single sign-on.</p>
 
-    <img src="https://raw.githubusercontent.com/aws/aws-toolkit-jetbrains/main/marketplaceGifs/JB-auth-Q.gif"></img>
+    <img src="https://raw.githubusercontent.com/aws/amazon-q-jetbrains/main/marketplaceGifs/JB-auth-Q.gif"></img>
 
     <h3>Troubleshooting & feedback</h3>
-    <p><a href="https://github.com/aws/aws-toolkit-jetbrains/issues/new?labels=bug&template=bug_report.md">File a bug</a> or <a href="https://github.com/aws/aws-toolkit-jetbrains/issues/new?labels=feature-request&template=feature_request.md">submit a feature request</a> on our Github repository.</p>
+    <p><a href="https://github.com/aws/amazon-q-jetbrains/issues/new?labels=bug&template=bug_report.md">File a bug</a> or <a href="https://github.com/aws/amazon-q-jetbrains/issues/new?labels=feature-request&template=feature_request.md">submit a feature request</a> on our Github repository.</p>
 
 ]]></description>
     <version>1.0</version>
-    <vendor email="aws-toolkit-jetbrains@amazon.com" url="https://github.com/aws/aws-toolkit-jetbrains">AWS</vendor>
+    <vendor email="aws-toolkit-jetbrains@amazon.com" url="https://github.com/aws/amazon-q-jetbrains">AWS</vendor>
     <idea-version since-build="232" />
     <depends>com.intellij.modules.platform</depends>
     <depends optional="true">org.jetbrains.idea.maven</depends>

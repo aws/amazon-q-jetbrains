@@ -46,7 +46,7 @@ val gatewayResources = configurations.register("gatewayResources") {
 }
 
 intellijPlatform {
-    projectName = "aws-toolkit-jetbrains"
+    projectName = "amazon-q-jetbrains"
     instrumentCode = false
 }
 

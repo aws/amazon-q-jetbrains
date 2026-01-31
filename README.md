@@ -1,25 +1,25 @@
-![Build Status](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiekhxeERIMmNLSkNYUktnUFJzUVJucmJqWnFLMGlpNXJiNE1LLzVWV3B1QUpSSkhCS04veHZmUGxZZ0ZmZlRzYjJ3T1VtVEs1b3JxbWNVOHFOeFJDOTAwPSIsIml2UGFyYW1ldGVyU3BlYyI6ImZXNW5KaytDRGNLdjZuZDgiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master) 
-[![Coverage](https://img.shields.io/codecov/c/github/aws/aws-toolkit-jetbrains/master.svg)](https://codecov.io/gh/aws/aws-toolkit-jetbrains/branch/master) 
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/11349-aws-toolkit.svg)](https://plugins.jetbrains.com/plugin/11349-aws-toolkit) 
-[![Version](https://img.shields.io/jetbrains/plugin/v/11349.svg?label=version)](https://plugins.jetbrains.com/plugin/11349-aws-toolkit)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=aws_aws-toolkit-jetbrains&metric=alert_status)](https://sonarcloud.io/dashboard?id=aws_aws-toolkit-jetbrains)
+![Build Status](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiekhxeERIMmNLSkNYUktnUFJzUVJucmJqWnFLMGlpNXJiNE1LLzVWV3B1QUpSSkhCS04veHZmUGxZZ0ZmZlRzYjJ3T1VtVEs1b3JxbWNVOHFOeFJDOTAwPSIsIml2UGFyYW1ldGVyU3BlYyI6ImZXNW5KaStDRGNLdjZuZDgiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=main) 
+[![Coverage](https://img.shields.io/codecov/c/github/aws/amazon-q-jetbrains/main.svg)](https://codecov.io/gh/aws/amazon-q-jetbrains/branch/main) 
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/24267-amazon-q.svg)](https://plugins.jetbrains.com/plugin/24267-amazon-q) 
+[![Version](https://img.shields.io/jetbrains/plugin/v/24267.svg?label=version)](https://plugins.jetbrains.com/plugin/24267-amazon-q)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=aws_amazon-q-jetbrains&metric=alert_status)](https://sonarcloud.io/dashboard?id=aws_amazon-q-jetbrains)
  
 # Amazon Q for JetBrains
 
 Amazon Q for JetBrains is a plugin for JetBrains IDEs that 
 make it easier to write applications built on [Amazon Web Services](https://aws.amazon.com/)
 
-The AWS Toolkit for JetBrains is open source because we want you to be involved. We appreciate issues, feature requests, pull 
+Amazon Q for JetBrains is open source because we want you to be involved. We appreciate issues, feature requests, pull 
 requests, code reviews or any other contributions.
 
 ## Feedback
 
 We want your feedback!
 
-- Vote on [feature requests](https://github.com/aws/aws-toolkit-jetbrains/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-request+sort%3Areactions-%2B1-desc). Votes help us drive prioritization of features 
-- [Request a new feature](https://github.com/aws/aws-toolkit-jetbrains/issues/new?labels=feature-request&template=feature_request.md)
-- [Ask a question](https://github.com/aws/aws-toolkit-jetbrains/issues/new?labels=guidance&template=guidance_request.md)
-- [File an issue](https://github.com/aws/aws-toolkit-jetbrains/issues/new?labels=bug&template=bug_report.md)
+- Vote on [feature requests](https://github.com/aws/amazon-q-jetbrains/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-request+sort%3Areactions-%2B1-desc). Votes help us drive prioritization of features 
+- [Request a new feature](https://github.com/aws/amazon-q-jetbrains/issues/new?labels=feature-request&template=feature_request.md)
+- [Ask a question](https://github.com/aws/amazon-q-jetbrains/issues/new?labels=guidance&template=guidance_request.md)
+- [File an issue](https://github.com/aws/amazon-q-jetbrains/issues/new?labels=bug&template=bug_report.md)
 - Code contributions. See [our contributing guide](CONTRIBUTING.md) for how to get started.
 
 ## Supported IDEs

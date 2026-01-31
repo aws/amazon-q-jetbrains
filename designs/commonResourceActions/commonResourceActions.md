@@ -63,7 +63,7 @@ removed and instead the Copy ARN action (and any other actions) would be configu
 * Encourages extension, which becomes difficult to test (e.g. currently `DeleteFunctionAction` extends `DeleteResourceAction`)
 
 [1]: images/common-resource-actions-example.png
-[2]: https://github.com/aws/aws-toolkit-jetbrains/blob/dffc7a8420cce51b21c937952a0330222ff564f8/jetbrains-core/src/software/aws/toolkits/jetbrains/core/explorer/ExplorerToolWindow.kt#L124
-[3]: https://github.com/aws/aws-toolkit-jetbrains/blob/dffc7a8420cce51b21c937952a0330222ff564f8/jetbrains-core/resources/META-INF/plugin.xml#L206
+[2]: https://github.com/aws/amazon-q-jetbrains/blob/dffc7a8420cce51b21c937952a0330222ff564f8/jetbrains-core/src/software/aws/toolkits/jetbrains/core/explorer/ExplorerToolWindow.kt#L124
+[3]: https://github.com/aws/amazon-q-jetbrains/blob/dffc7a8420cce51b21c937952a0330222ff564f8/jetbrains-core/resources/META-INF/plugin.xml#L206
 [4]: https://en.wikipedia.org/wiki/Single_responsibility_principle
-[5]: https://github.com/aws/aws-toolkit-jetbrains/issues/1184
+[5]: https://github.com/aws/amazon-q-jetbrains/issues/1184
