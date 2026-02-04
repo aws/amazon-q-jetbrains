@@ -93,11 +93,16 @@ class WorkspaceServiceHandler(
 
     private fun shouldHandleFile(file: VirtualFile, operation: FileOperationType): Boolean {
         val matchers = operationMatchers[operation] ?: return false
+        val filePath = file.path
+        // Convert absolute path to relative path for glob matching
+        // Java's PathMatcher with glob patterns like **/*.py doesn't match absolute paths
+        val relativePath = if (filePath.startsWith("/")) filePath.substring(1) else filePath
+        val path = Paths.get(relativePath)
         return matchers.any { (matcher, type) ->
             when (type) {
-                "file" -> !file.isDirectory && matcher.matches(Paths.get(file.path))
-                "folder" -> file.isDirectory && matcher.matches(Paths.get(file.path))
-                else -> matcher.matches(Paths.get(file.path))
+                "file" -> !file.isDirectory && matcher.matches(path)
+                "folder" -> file.isDirectory
+                else -> matcher.matches(path)
             }
         }
     }
@@ -146,8 +151,8 @@ class WorkspaceServiceHandler(
                         toUriString(file)
                     }
                     is VFileMoveEvent -> {
-                        val oldFile = event.oldParent?.takeIf { shouldHandleFile(it, FileOperationType.DELETE) } ?: return@mapNotNull null
-                        toUriString(oldFile)
+                        val file = event.file.takeIf { shouldHandleFile(it, FileOperationType.DELETE) } ?: return@mapNotNull null
+                        "file://${event.oldPath}"
                     }
                     else -> null
                 }?.let { uri ->
@@ -238,9 +243,9 @@ class WorkspaceServiceHandler(
                     }
                     is VFileMoveEvent -> {
                         listOfNotNull(
-                            toUriString(event.oldParent)?.let { oldUri ->
+                            event.file.let {
                                 FileEvent().apply {
-                                    uri = oldUri
+                                    uri = "file://${event.oldPath}"
                                     type = FileChangeType.Deleted
                                 }
                             },
