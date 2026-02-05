@@ -33,7 +33,7 @@ testLogger = "4.0.0"
 testRetry = "1.5.10"
 shadow = "9.2.2"
 # test-only; platform provides slf4j transitively at runtime
-slf4j = "2.0.16"
+slf4j = "2.0.17"
 sshd = "2.13.2"
 undercouch-download = "5.2.1"
 wiremock = "3.9.1"
