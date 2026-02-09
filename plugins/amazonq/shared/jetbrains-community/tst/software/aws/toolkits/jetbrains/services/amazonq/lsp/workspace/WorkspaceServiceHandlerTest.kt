@@ -26,6 +26,8 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
+import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -46,9 +48,9 @@ import org.eclipse.lsp4j.RenameFilesParams
 import org.eclipse.lsp4j.ServerCapabilities
 import org.eclipse.lsp4j.WorkspaceFolder
 import org.eclipse.lsp4j.WorkspaceServerCapabilities
-import org.eclipse.lsp4j.jsonrpc.messages.ResponseMessage
 import org.eclipse.lsp4j.services.TextDocumentService
 import org.eclipse.lsp4j.services.WorkspaceService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import software.aws.toolkits.jetbrains.services.amazonq.lsp.AmazonQLanguageServer
@@ -56,8 +58,6 @@ import software.aws.toolkits.jetbrains.services.amazonq.lsp.AmazonQLspService
 import software.aws.toolkits.jetbrains.services.amazonq.lsp.util.WorkspaceFolderUtil
 import java.net.URI
 import java.nio.file.Path
-import java.util.concurrent.Callable
-import java.util.concurrent.CompletableFuture
 
 class WorkspaceServiceHandlerTest {
     private lateinit var project: Project
@@ -81,9 +81,6 @@ class WorkspaceServiceHandlerTest {
         mockApplication = mockk<Application>()
         mockkStatic(ApplicationManager::class)
         every { ApplicationManager.getApplication() } returns mockApplication
-        every { mockApplication.executeOnPooledThread(any<Callable<*>>()) } answers {
-            CompletableFuture.completedFuture(firstArg<Callable<*>>().call())
-        }
 
         // Mock the LSP service
         val mockLspService = mockk<AmazonQLspService>()
@@ -92,11 +89,11 @@ class WorkspaceServiceHandlerTest {
         every { project.getService(AmazonQLspService::class.java) } returns mockLspService
         every { project.serviceIfCreated<AmazonQLspService>() } returns mockLspService
 
-        // Mock the LSP service's executeSync method as a suspend function
+        // Mock the LSP service's executeIfRunning method as a suspend function
         coEvery {
-            mockLspService.executeIfRunning<CompletableFuture<ResponseMessage>>(any())
+            mockLspService.executeIfRunning<Any?>(any())
         } coAnswers {
-            val func = firstArg<suspend AmazonQLspService.(AmazonQLanguageServer) -> CompletableFuture<ResponseMessage>>()
+            val func = firstArg<suspend AmazonQLspService.(AmazonQLanguageServer) -> Any?>()
             func.invoke(mockLspService, mockLanguageServer)
         }
 
@@ -150,9 +147,22 @@ class WorkspaceServiceHandlerTest {
         every { mockCapabilities.workspace } returns mockWorkspaceCapabilities
         every { mockInitializeResult.capabilities } returns mockCapabilities
 
+        // executeAsyncIfRunning delegates to serviceIfCreated then executeIfRunning on instance
+        // No need to mock the companion object - the instance mock handles it
+
         // Create WorkspaceServiceHandler with mocked InitializeResult
         testScope = TestScope()
         sut = WorkspaceServiceHandler(project, testScope, mockInitializeResult)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkStatic(ApplicationManager::class)
+        try {
+            unmockkObject(WorkspaceFolderUtil)
+        } catch (_: Exception) {
+            // WorkspaceFolderUtil may not be mocked in all tests
+        }
     }
 
     @Test
