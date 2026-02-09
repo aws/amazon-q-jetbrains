@@ -55,7 +55,7 @@ jobs:
           retention-days: 1
 
   generate_changelog:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       TAG_NAME: ${{ github.event.inputs.tag_name }}
     outputs:
