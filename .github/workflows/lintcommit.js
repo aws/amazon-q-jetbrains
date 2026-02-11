@@ -43,30 +43,11 @@ const types = new Set([
     'types',
 ])
 
-// TODO: Validate against this once we are satisfied with this list.
-const scopes = new Set([
-    'amazonq',
-    'core',
-    'explorer',
-    'lambda',
-    'logs',
-    'redshift',
-    'q-chat',
-    'q-featuredev',
-    'q-inlinechat',
-    'q-transform',
-    'sam',
-    's3',
-    'telemetry',
-    'toolkit',
-    'ui',
-])
-void scopes
 
 /**
  * Checks that a pull request title, or commit message subject, follows the expected format:
  *
- *      type(scope): message
+ *      type: message
  *
  * Returns undefined if `title` is valid, else an error message.
  */
@@ -82,9 +63,7 @@ function validateTitle(title) {
         return 'missing colon (:) char'
     }
 
-    const typeScope = parts[0]
-
-    const [type, scope] = typeScope.split(/\(([^)]+)\)$/)
+    const type = parts[0].trim()
 
     if (/\s+/.test(type)) {
         return `type contains whitespace: "${type}"`
@@ -92,14 +71,6 @@ function validateTitle(title) {
         return 'Do not use "chore" as a type. If the existing valid types are insufficent, add a new type to the `lintcommit.js` script.'
     } else if (!types.has(type)) {
         return `invalid type "${type}"`
-    } else if (!scope && typeScope.includes('(')) {
-        return `must be formatted like type(scope):`
-    } else if (!scope && ['feat', 'fix'].includes(type)) {
-        return `"${type}" type must include a scope (example: "${type}(amazonq)")`
-    } else if (scope && scope.length > 30) {
-        return 'invalid scope (must be <=30 chars)'
-    } else if (scope && /[^- a-z0-9]+/.test(scope)) {
-        return `invalid scope (must be lowercase, ascii only): "${scope}"`
     } else if (subject.length === 0) {
         return 'empty subject'
     } else if (subject.length > 100) {
@@ -128,9 +99,8 @@ function run() {
 Invalid pull request title: \`${title}\`
 
 * Problem: ${failReason}
-* Expected format: \`type(scope): subject...\`
+* Expected format: \`type: subject...\`
     * type: one of (${Array.from(types).join(', ')})
-    * scope: lowercase, <30 chars
     * subject: must be <100 chars
     * documentation: https://github.com/aws/aws-toolkit-vscode/blob/master/CONTRIBUTING.md#pull-request-title
 * Hint: *close and re-open the PR* to re-trigger CI (after fixing the PR title).
@@ -151,7 +121,7 @@ Invalid pull request title: \`${title}\`
 
 function _test() {
     const tests = {
-        ' foo(scope): bar': 'type contains whitespace: " foo"',
+        ' foo: bar': 'invalid type "foo"',
         'build: update build process': undefined,
         'chore: update dependencies':
             'Do not use "chore" as a type. If the existing valid types are insufficent, add a new type to the `lintcommit.js` script.',
@@ -159,20 +129,13 @@ function _test() {
         'config: update configuration files': undefined,
         'deps: bump the aws-sdk group across 1 directory with 5 updates': undefined,
         'docs: update documentation': undefined,
-        'feat(foo): add new feature': undefined,
-        'feat(foo):': 'empty subject',
-        'feat foo):': 'type contains whitespace: "feat foo)"',
-        'feat(foo)): sujet': 'invalid type "feat(foo))"',
-        'feat(foo: sujet': 'invalid type "feat(foo"',
-        'feat(Q Foo Bar): bar': 'invalid scope (must be lowercase, ascii only): "Q Foo Bar"',
-        'feat(scope):': 'empty subject',
-        'feat(q foo bar): bar': undefined,
-        'feat(foo): x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ':
+        'feat: add new feature': undefined,
+        'feat:': 'empty subject',
+        'feat: x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ':
             'invalid subject (must be <=100 chars)',
-        'feat: foo': '"feat" type must include a scope (example: "feat(amazonq)")',
-        'fix: foo': '"fix" type must include a scope (example: "fix(amazonq)")',
-        'fix(a-b-c): resolve issue': undefined,
-        'foo (scope): bar': 'type contains whitespace: "foo "',
+        'feat: foo': undefined,
+        'fix: foo': undefined,
+        'fix: resolve issue': undefined,
         'invalid title': 'missing colon (:) char',
         'perf: optimize performance': undefined,
         'refactor: improve code structure': undefined,
