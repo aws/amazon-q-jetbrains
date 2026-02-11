@@ -15,7 +15,6 @@ enum class IdeFlavor {
     /* paid */
     /* RR is 'non-commerical free' but treat as paid */
     DB, CL, GO, IU, PS, PY, RM, RR, WS,
-    RD,
 }
 
 object IdeVersions {

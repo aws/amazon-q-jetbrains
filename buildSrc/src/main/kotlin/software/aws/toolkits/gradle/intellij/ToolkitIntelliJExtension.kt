@@ -36,7 +36,6 @@ abstract class ToolkitIntelliJExtension(private val providers: ProviderFactory) 
             IdeFlavor.WS,
                 -> ideProfile().map { it.ultimate }
 
-            IdeFlavor.RD -> ideProfile().map { it.rider }
             IdeFlavor.GW -> ideProfile().map { it.gateway!! }
         }
     }

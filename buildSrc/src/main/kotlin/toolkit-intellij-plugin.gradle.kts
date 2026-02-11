@@ -8,10 +8,6 @@ import software.aws.toolkits.gradle.intellij.ToolkitIntelliJExtension
 val intellijToolkit = project.extensions.create("intellijToolkit", ToolkitIntelliJExtension::class)
 // TODO: how did this break?
 when {
-    project.name.contains("jetbrains-rider") -> {
-        intellijToolkit.ideFlavor.set(IdeFlavor.RD)
-    }
-
     project.name.contains("jetbrains-ultimate") -> {
         intellijToolkit.ideFlavor.set(IdeFlavor.IU)
     }
