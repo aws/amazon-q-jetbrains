@@ -57,13 +57,6 @@ object IdeVersions {
                     "com.intellij.modules.json:243.26574.91"
                 )
             ),
-            rider = RiderProfile(
-                sdkVersion = "2024.3",
-                bundledPlugins = commonPlugins,
-                netFrameworkTarget = "net472",
-                rdGenVersion = "2024.3.0",
-                nugetVersion = " 2024.3.0"
-            )
         ),
         Profile(
             name = "2025.1",
@@ -99,13 +92,6 @@ object IdeVersions {
                     "com.intellij.modules.json:251.27812.12"
                 )
             ),
-            rider = RiderProfile(
-                sdkVersion = "2025.1",
-                bundledPlugins = commonPlugins,
-                netFrameworkTarget = "net472",
-                rdGenVersion = "2025.1.1",
-                nugetVersion = " 2025.1.0"
-            )
         ),
         Profile(
             name = "2025.2",
@@ -142,13 +128,6 @@ object IdeVersions {
                     "com.intellij.modules.json:252.23892.360"
                 )
             ),
-            rider = RiderProfile(
-                sdkVersion = "2025.2",
-                bundledPlugins = commonPlugins,
-                netFrameworkTarget = "net472",
-                rdGenVersion = "2025.2.2",
-                nugetVersion = "2025.2.0"
-            )
         ),
         Profile(
             name = "2025.3",
@@ -185,13 +164,6 @@ object IdeVersions {
                     "com.intellij.modules.json:253.28294.251"
                 )
             ),
-            rider = RiderProfile(
-                sdkVersion = "2025.3",
-                bundledPlugins = commonPlugins,
-                netFrameworkTarget = "net472",
-                rdGenVersion = "2025.3.1",
-                nugetVersion = "2025.3.0"
-            )
         )
     ).associateBy { it.name }
 
@@ -227,7 +199,7 @@ class Profile(
     val gateway: ProductProfile? = null,
     val community: ProductProfile,
     val ultimate: ProductProfile,
-    val rider: RiderProfile,
+//    val rider: RiderProfile,
 )
 
 private fun shortenedIdeProfileName(sdkName: String): String {
