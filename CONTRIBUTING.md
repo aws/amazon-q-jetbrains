@@ -38,9 +38,9 @@ reported the issue. Please try to include as much information as you can. Detail
 
 1. Clone the github repository.
 2. To manually build a plugin distribution, run the global task, `./gradlew buildPlugin` to build all plugins, or on specific subproject if you want a specific plugin
-   - For example, `./gradlew :plugin-toolkit:intellij-standalone:buildPlugin` will produce a plugin zip under `plugins/toolkit/intellij-standalone/build/distributions`.
-   - You can also run the `:plugin-core:buildPlugin` and `:plugin-amazonq:buildPlugin` tasks 
-   - Use the `-PideProfileName={JETBRAINS_VERSION}` option to build the plugin for a particular IDE version (e.g `./gradlew :plugin-toolkit:intellij-standalone:buildPlugin -PideProfileName=2024.1`)
+   - For example, `./gradlew :plugin-amazonq:buildPlugin` will produce a plugin zip under `plugins/amazonq/build/distributions`.
+   - You can also run the `:plugin-core-q:buildPlugin` task
+   - Use the `-PideProfileName={JETBRAINS_VERSION}` option to build the plugin for a particular IDE version (e.g `./gradlew :plugin-amazonq:buildPlugin -PideProfileName=2024.1`)
 3. In your JetBrains IDE (e.g. IntelliJ) navigate to the `Plugins` preferences and select "Install Plugin from Disk...", navigate to the zip file(s) produced in step 2.
 4. You will be prompted to restart your IDE.
 
@@ -61,7 +61,7 @@ To send us a pull request, please:
    ./gradlew check
    ```
 
-4. Generate a change log entry for your change if the change is visible to users of the toolkit in their IDE.
+4. Generate a change log entry for your change if the change is visible to users of the plugin in their IDE.
    ```
    ./gradlew :newChange --console plain
    ```
@@ -90,22 +90,16 @@ If ran using the Debug feature, a debugger will be auto-attached to the sandbox 
 
   ```
   # IntelliJ IDEA Community
-  ./gradlew :plugin-toolkit:intellij-standalone:runIde -PrunIdeVariant=IC
   ./gradlew :plugin-amazonq:runIde -PrunIdeVariant=IC
   ./gradlew :sandbox-all:runIde -PrunIdeVariant=IC
 
   # IntelliJ IDEA Ultimate
-  ./gradlew :plugin-toolkit:intellij-standalone:runIde -PrunIdeVariant=IU
   ./gradlew :plugin-amazonq:runIde -PrunIdeVariant=IU
   ./gradlew :sandbox-all:runIde -PrunIdeVariant=IU
 
   # Rider
-  ./gradlew :plugin-toolkit:intellij-standalone:runIde -PrunIdeVariant=RD
   ./gradlew :plugin-amazonq:runIde -PrunIdeVariant=RD
   ./gradlew :sandbox-all:runIde -PrunIdeVariant=RD
-
-  # Gateway
-  ./gradlew :plugin-toolkit:jetbrains-gateway:runIde
   ```
   - These targets download the required IDE for testing.
 
@@ -113,7 +107,7 @@ If ran using the Debug feature, a debugger will be auto-attached to the sandbox 
 
 - To run the plugin in a **specific JetBrains IDE** (and you have it installed), specify the `ALTERNATIVE_IDE` environment variable:
   ```
-  ALTERNATIVE_IDE=/path/to/ide ./gradlew :plugin-toolkit:intellij-standalone:runIde
+  ALTERNATIVE_IDE=/path/to/ide ./gradlew :plugin-amazonq:runIde
   ```
   - This is needed to run PyCharm and WebStorm.
   - See also `alternativeIdePath` option in the `runIde` tasks provided by the Gradle IntelliJ Plugin [documentation](https://github.com/JetBrains/gradle-intellij-plugin).
@@ -152,16 +146,14 @@ It is **NOT** recommended for third party contributors to run these due to they 
 The sandbox IDE runs with a debug port open (`5005`). In your main IDE, create a Java Remote Debug run configuration and tell it to attach to that port.
 
 If the tests run too quickly, you can tell the UI tests to wait for the debugger to attach by editing the `suspend.set(false)` to `true` in the tasks
-`RunIdeForUiTestTask` in [toolkit-intellij-subplugin Gradle plugin](buildSrc/src/main/kotlin/toolkit-intellij-subplugin.gradle.kts)
+`RunIdeForUiTestTask` in the relevant Gradle plugin configuration under `buildSrc/src/main/kotlin/`.
 
 ### Logging
 
 - Log messages (`LOG.info`, `LOG.error()`, …) by default are written to:
   ```
-  plugins/toolkit/intellij/build/idea-sandbox/system/log/idea.log
-  plugins/toolkit/intellij/build/idea-sandbox/system-test/logs/idea.log  # Tests
-
-  plugins/toolkit/jetbrains-gateway/build/idea-sandbox/system/logs/idea.log  # Gateway
+  plugins/amazonq/build/idea-sandbox/system/log/idea.log
+  plugins/amazonq/build/idea-sandbox/system-test/logs/idea.log  # Tests
   ```
 - DEBUG-level log messages are skipped by default. To enable them, add the
   following line to the _Help_ \> _Debug Log Settings_ dialog in the IDE
