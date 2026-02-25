@@ -146,6 +146,8 @@
         <postStartupActivity implementation="software.amazon.q.jetbrains.core.plugin.PluginAutoUpdater"/>
         <postStartupActivity implementation="software.amazon.q.jetbrains.core.AwsTelemetryPrompter"/>
         <postStartupActivity implementation="software.amazon.q.jetbrains.services.telemetry.AwsToolkitStartupMetrics"/>
+        <postStartupActivity implementation="software.aws.toolkits.jetbrains.core.notification.MinimumVersionChange"/>
+        <notificationGroup id="aws.toolkit_deprecation" displayType="STICKY_BALLOON" key="aws.toolkit_deprecation.title"/>
 
         <applicationService serviceInterface="migration.software.amazon.q.jetbrains.settings.AwsSettings"
                             serviceImplementation="software.amazon.q.jetbrains.settings.DefaultAwsSettings"
