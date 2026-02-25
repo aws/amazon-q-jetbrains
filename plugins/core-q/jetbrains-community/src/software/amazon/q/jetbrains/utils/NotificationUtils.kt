@@ -23,8 +23,8 @@ import software.amazon.q.resources.AwsCoreBundle
 import javax.swing.JLabel
 import javax.swing.JTextArea
 
-private const val GROUP_DISPLAY_ID = "AWS Toolkit"
-private const val GROUP_DISPLAY_ID_STICKY = "aws.toolkit_sticky"
+private const val GROUP_DISPLAY_ID = "Amazon Q"
+private const val GROUP_DISPLAY_ID_STICKY = "amazon.q_sticky"
 
 private val LOG = LoggerFactory.getLogger("NotificationUtils.kt")
 

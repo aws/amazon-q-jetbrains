@@ -102,10 +102,10 @@ Invalid pull request title: \`${title}\`
 * Expected format: \`type: subject...\`
     * type: one of (${Array.from(types).join(', ')})
     * subject: must be <100 chars
-    * documentation: https://github.com/aws/aws-toolkit-vscode/blob/master/CONTRIBUTING.md#pull-request-title
+    * documentation: https://github.com/aws/amazon-q-jetbrains/blob/main/CONTRIBUTING.md#pull-request-title
 * Hint: *close and re-open the PR* to re-trigger CI (after fixing the PR title).
 `
-        : `Pull request title matches the [expected format](https://github.com/aws/aws-toolkit-vscode/blob/master/CONTRIBUTING.md#pull-request-title).`
+        : `Pull request title matches the [expected format](https://github.com/aws/amazon-q-jetbrains/blob/main/CONTRIBUTING.md#pull-request-title).`
 
     if (process.env.GITHUB_STEP_SUMMARY) {
         fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, msg)

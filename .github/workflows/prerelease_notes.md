@@ -1,4 +1,4 @@
-_This is an **unsupported preview build** of the `${BRANCH}` branch of AWS Toolkit._
+_This is an **unsupported preview build** of the `${BRANCH}` branch of Amazon Q._
 
 # Install
 
@@ -8,4 +8,4 @@ _This is an **unsupported preview build** of the `${BRANCH}` branch of AWS Toolk
 
 # Changes
 
-${AWS_TOOLKIT_CHANGES}
+${AMAZON_Q_CHANGES}
