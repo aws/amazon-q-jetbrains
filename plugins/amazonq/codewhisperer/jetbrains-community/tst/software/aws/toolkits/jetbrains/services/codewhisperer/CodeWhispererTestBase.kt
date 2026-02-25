@@ -316,23 +316,26 @@ open class CodeWhispererTestBase {
         val psiFileCaptor = argumentCaptor<PsiFile>()
         val latencyContextCaptor = argumentCaptor<LatencyContext>()
 
-        wheneverBlocking {
-            codewhispererService.getRequestContext(
-                triggerTypeCaptor.capture(),
-                editorCaptor.capture(),
-                projectCaptor.capture(),
-                psiFileCaptor.capture(),
-                latencyContextCaptor.capture()
-            )
-        }.doSuspendableAnswer {
-            projectRule.fixture.type(userInput)
-            codewhispererService.getRequestContext(
-                triggerTypeCaptor.firstValue,
-                editorCaptor.firstValue,
-                projectRule.project,
-                psiFileCaptor.firstValue,
-                latencyContextCaptor.firstValue
-            )
+        codewhispererService.stub {
+            onBlocking {
+                getRequestContext(
+                    triggerTypeCaptor.capture(),
+                    editorCaptor.capture(),
+                    projectCaptor.capture(),
+                    psiFileCaptor.capture(),
+                    latencyContextCaptor.capture()
+                )
+            } doSuspendableAnswer {
+                val requestContext = codewhispererService.getRequestContext(
+                    triggerTypeCaptor.firstValue,
+                    editorCaptor.firstValue,
+                    projectRule.project,
+                    psiFileCaptor.firstValue,
+                    latencyContextCaptor.firstValue
+                )
+                projectRule.fixture.type(userInput)
+                requestContext
+            }
         }
     }
 
