@@ -115,7 +115,7 @@ develocity {
 }
 apply(from = "kotlinResolution.settings.gradle.kts")
 
-rootProject.name = "aws-toolkit-jetbrains"
+rootProject.name = "amazon-q-jetbrains"
 
 include("detekt-rules")
 include("sandbox-all")

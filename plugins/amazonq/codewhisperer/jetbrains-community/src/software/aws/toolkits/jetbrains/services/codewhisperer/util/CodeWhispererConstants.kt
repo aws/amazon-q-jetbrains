@@ -51,7 +51,7 @@ object CodeWhispererConstants {
     const val Q_SUPPORTED_LANG_URI = "https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-language-ide-support.html"
     const val CODEWHISPERER_CODE_SCAN_LEARN_MORE_URI = "https://docs.aws.amazon.com/codewhisperer/latest/userguide/security-scans.html"
     const val CODEWHISPERER_ONBOARDING_DOCUMENTATION_URI = "https://docs.aws.amazon.com/codewhisperer/latest/userguide/features.html"
-    const val Q_GITHUB_URI = "https://github.com/aws/aws-toolkit-jetbrains/issues"
+    const val Q_GITHUB_URI = "https://github.com/aws/amazon-q-jetbrains/issues"
 
     const val THROTTLING_MESSAGE = "Maximum recommendation count reached for this month."
 

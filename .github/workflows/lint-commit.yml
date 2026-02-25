@@ -5,7 +5,7 @@ on:
     # By default, CI will trigger on opened/synchronize/reopened event types.
     # https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#pull_request
     # Note: To re-run `lint-commits` after fixing the PR title, close-and-reopen the PR.
-    branches: [main, feature/*]
+    branches: [main, feature/*, fix/*, test/*]
 
 # Cancel old jobs when a pull request is updated.
 concurrency:

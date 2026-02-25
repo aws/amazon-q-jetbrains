@@ -15,7 +15,7 @@ This can also be used as a method of surfacing information toasts with links for
 ![3]
 
 #### Surfacing Method
-* Call a [`NotificationUtils`](https://github.com/aws/aws-toolkit-jetbrains/blob/master/jetbrains-core/src/software/aws/toolkits/jetbrains/utils/NotificationUtils.kt) function
+* Call a [`NotificationUtils`](https://github.com/aws/amazon-q-jetbrains/blob/master/jetbrains-core/src/software/aws/toolkits/jetbrains/utils/NotificationUtils.kt) function
 * Throw an error without catching it. This method should not be intentionally used within the toolkit and should be remedied to correctly present an error if this is noticed.
 
 ### AWS Explorer Errors
@@ -26,7 +26,7 @@ Errors from the AWS Explorer are reflected in a node with the error messaging. T
 ![5]
 
 #### Surfacing Method
-* An [`AwsExplorerErrorNode`](https://github.com/aws/aws-toolkit-jetbrains/blob/master/jetbrains-core/src/software/aws/toolkits/jetbrains/core/explorer/nodes/AwsExplorerErrorNode.kt) is manually created and appended to Explorer tree
+* An [`AwsExplorerErrorNode`](https://github.com/aws/amazon-q-jetbrains/blob/master/jetbrains-core/src/software/aws/toolkits/jetbrains/core/explorer/nodes/AwsExplorerErrorNode.kt) is manually created and appended to Explorer tree
 
 ### Build Errors
 Build errors are reflected in a few locations:
@@ -62,7 +62,7 @@ Multiple types of errors can be spawned from JetBrains forms:
 
 #### Surfacing Method
 * Failed validation: return `ValidationInfo` object
-* Failed data population: Current standard is to use a [`ResourceSelector`](https://github.com/aws/aws-toolkit-jetbrains/blob/master/jetbrains-core/src/software/aws/toolkits/jetbrains/ui/ResourceSelector.kt) object. If this fails, this draws a general and validation error (through their respective mechanisms).
+* Failed data population: Current standard is to use a [`ResourceSelector`](https://github.com/aws/amazon-q-jetbrains/blob/master/jetbrains-core/src/software/aws/toolkits/jetbrains/ui/ResourceSelector.kt) object. If this fails, this draws a general and validation error (through their respective mechanisms).
 * Failed run configuration: Throw a RuntimeConfigurationError from a class that extends [`LocatableConfigurationBase`](https://upsource.jetbrains.com/idea-ce/file/idea-ce-d00d8b4ae3ed33097972b8a4286b336bf4ffcfab/platform/lang-api/src/com/intellij/execution/configurations/LocatableConfigurationBase.java)
 
 ## Guidelines

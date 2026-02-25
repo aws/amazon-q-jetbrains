@@ -7,7 +7,7 @@ on:
         required: false
         default: prerelease
   push:
-    branches: [ main, feature/* ]
+    branches: [ main, feature/*, fix/* ]
 
 concurrency:
   group: ${{ github.workflow }}${{ github.event.pull_request.number || github.ref }}
@@ -105,9 +105,9 @@ jobs:
       GH_REPO: ${{ github.repository }}
       FEAT_NAME: ${{ needs.generate_changelog.outputs.feature }}
       TAG_NAME: ${{ needs.generate_changelog.outputs.tagname }}
-      AWS_TOOLKIT_VERSION: ${{ needs.generate_changelog.outputs.version }}
+      AMAZON_Q_VERSION: ${{ needs.generate_changelog.outputs.version }}
       BRANCH: ${{ github.ref_name }}
-      AWS_TOOLKIT_CHANGES: ${{ needs.generate_changelog.outputs.changes }}
+      AMAZON_Q_CHANGES: ${{ needs.generate_changelog.outputs.changes }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -118,7 +118,7 @@ jobs:
         # "prerelease" (main branch) or "pre-<feature>"
         if: "env.TAG_NAME == 'prerelease' || startsWith(env.TAG_NAME, 'pre-')"
         run: |
-          echo "SUBJECT=Amazon Q ${AWS_TOOLKIT_VERSION}: ${FEAT_NAME:-${TAG_NAME}}" >> $GITHUB_ENV
+          echo "SUBJECT=Amazon Q ${AMAZON_Q_VERSION}: ${FEAT_NAME:-${TAG_NAME}}" >> $GITHUB_ENV
           gh release delete "$TAG_NAME" --cleanup-tag --yes || true
       - name: Publish to GitHub Releases
         run: |

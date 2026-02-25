@@ -1,7 +1,7 @@
 version: 1.0
 linter: jetbrains/qodana-jvm-community:latest
 projectJDK: "21"
-bootstrap: ./gradlew :plugin-core:sdk-codegen:generateSdks :plugin-core:jetbrains-community:generateTelemetry :plugin-toolkit:jetbrains-rider:generateModels
+bootstrap: ./gradlew :plugin-core-q:sdk-codegen:generateSdks :plugin-core-q:jetbrains-community:generateTelemetry
 profile:
   name: qodana.recommended
 exclude:

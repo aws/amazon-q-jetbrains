@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for the AWS Toolkit
+about: Suggest an idea for Amazon Q
 labels: feature-request 
 ---
 

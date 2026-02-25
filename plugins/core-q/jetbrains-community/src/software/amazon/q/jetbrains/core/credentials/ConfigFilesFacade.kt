@@ -53,7 +53,7 @@ class DefaultConfigFilesFacade(
         val TEMPLATE =
             """
         # Amazon Web Services Config File used by AWS CLI, SDKs, and tools
-        # This file was created by the AWS Toolkit for JetBrains plugin.
+        # This file was created by the Amazon Q for JetBrains plugin.
         #
         # Your AWS credentials are represented by access keys associated with IAM users.
         # For information about how to create and manage AWS access keys for a user, see:
