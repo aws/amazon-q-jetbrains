@@ -9,12 +9,11 @@ on:
   push:
     branches: [ main, feature/*, fix/* ]
 
-concurrency:
-  group: ${{ github.workflow }}${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   generate_artifact:
+    concurrency:
+      group: generate_artifact-${{ github.ref }}-${{ matrix.version }}
+      cancel-in-progress: false
     strategy:
       matrix:
         build_target: [ ':plugin-amazonq:buildPlugin' ]
@@ -55,6 +54,9 @@ jobs:
           retention-days: 1
 
   generate_changelog:
+    concurrency:
+      group: ${{ github.workflow }}${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     env:
       TAG_NAME: ${{ github.event.inputs.tag_name }}
@@ -99,6 +101,9 @@ jobs:
           echo 'EOF' >> $GITHUB_OUTPUT
 
   publish:
+    concurrency:
+      group: ${{ github.workflow }}${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     needs: [  generate_artifact, generate_changelog ]
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
