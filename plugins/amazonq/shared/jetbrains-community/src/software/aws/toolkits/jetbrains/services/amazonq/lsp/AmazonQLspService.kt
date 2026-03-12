@@ -321,6 +321,7 @@ class AmazonQLspService @VisibleForTesting constructor(
         private const val RESTART_WINDOW_MS = 3 * 60 * 1000
         fun getInstance(project: Project) = project.service<AmazonQLspService>()
 
+        @Suppress("RedundantSuspendModifier")
         suspend fun <T> executeAsyncIfRunning(project: Project, runnable: suspend AmazonQLspService.(AmazonQLanguageServer) -> T): T? =
             project.serviceIfCreated<AmazonQLspService>()?.executeIfRunning(runnable)
     }
