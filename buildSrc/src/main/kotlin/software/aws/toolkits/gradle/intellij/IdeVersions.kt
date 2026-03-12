@@ -149,6 +149,48 @@ object IdeVersions {
                 rdGenVersion = "2025.3.1",
                 nugetVersion = "2025.3.0"
             )
+        ),
+        Profile(
+            name = "2026.1",
+            gateway = ProductProfile(
+                sdkVersion = "261.22158-EAP-CANDIDATE-SNAPSHOT",
+                bundledPlugins = listOf("org.jetbrains.plugins.terminal")
+            ),
+            community = ProductProfile(
+                sdkVersion = "261.22158-EAP-CANDIDATE-SNAPSHOT",
+                bundledPlugins = commonPlugins + listOf(
+                    "com.intellij.java",
+                    "com.intellij.gradle",
+                    "org.jetbrains.idea.maven",
+                    "com.intellij.properties"
+                ),
+                marketplacePlugins = listOf(
+                    "org.toml.lang:261.22158.36",
+                    "PythonCore:261.22158.46",
+                    "Docker:261.22158.45",
+                    "com.intellij.modules.json:261.22158.46"
+                )
+            ),
+            ultimate = ProductProfile(
+                sdkVersion = "261.22158-EAP-CANDIDATE-SNAPSHOT",
+                bundledPlugins = commonPlugins + listOf(
+                    "JavaScript",
+                    "JavaScriptDebugger",
+                    "com.intellij.database"
+                ),
+                marketplacePlugins = listOf(
+                    "Pythonid:261.22158.46",
+                    "org.jetbrains.plugins.go:261.22158.46",
+                    "com.intellij.modules.json:261.22158.46"
+                )
+            ),
+            rider = RiderProfile(
+                sdkVersion = "2026.1-SNAPSHOT",
+                bundledPlugins = commonPlugins,
+                netFrameworkTarget = "net472",
+                rdGenVersion = "2026.1.3",
+                nugetVersion = "2026.1.0"
+            )
         )
     ).associateBy { it.name }
 

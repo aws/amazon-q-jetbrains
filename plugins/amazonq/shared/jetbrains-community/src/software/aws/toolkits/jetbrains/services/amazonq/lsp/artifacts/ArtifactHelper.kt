@@ -110,6 +110,7 @@ class ArtifactHelper(private val lspArtifactsPath: Path = DEFAULT_ARTIFACT_PATH,
         return !hasInvalidFiles
     }
 
+    @Suppress("RedundantSuspendModifier")
     suspend fun tryDownloadLspArtifacts(project: Project, targetVersion: Version, target: VersionTarget): Path? {
         val destinationPath = lspArtifactsPath.resolve(targetVersion.serverVersion.toString())
 
