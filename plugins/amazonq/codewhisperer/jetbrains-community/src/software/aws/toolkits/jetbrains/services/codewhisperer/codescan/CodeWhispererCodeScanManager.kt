@@ -352,6 +352,7 @@ class CodeWhispererCodeScanManager(val project: Project, private val defaultScop
         }
     }
 
+    @Suppress("RedundantSuspendModifier")
     private suspend fun isInValidFile(
         selectedFile: VirtualFile?,
         language: CodeWhispererProgrammingLanguage,
