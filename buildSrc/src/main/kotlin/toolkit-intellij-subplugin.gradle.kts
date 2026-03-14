@@ -135,6 +135,9 @@ tasks.withType<Test>().configureEach {
     systemProperty("log.dir", intellijPlatform.sandboxContainer.map { "$it-test/logs" }.get())
     systemProperty("testDataPath", project.rootDir.resolve("testdata").absolutePath)
     systemProperty("org.gradle.project.ideProfileName", ideProfile.name)
+
+    // Ensure enough coroutine scheduler threads for IntelliJ platform Transactor on resource-constrained CI runners (e.g. GitHub Actions with 2 cores)
+    systemProperty("kotlinx.coroutines.scheduler.core.pool.size", "4")
 }
 
 tasks.withType<JavaExec>().configureEach {

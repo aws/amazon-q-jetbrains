@@ -1,0 +1,76 @@
+name: Linux Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main, feature/*, fix/*, test/* ]
+
+jobs:
+  linux-unit-tests:
+    name: Linux (${{ matrix.ideProfileName }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ideProfileName: [ "2025.1", "2025.2", "2025.3" ]
+    env:
+      CI: true
+      LOCAL_ENV_RUN: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+          cache: 'gradle'
+
+      - name: Configure Gradle properties
+        run: |
+          mkdir -p ~/.gradle
+          cat >> ~/.gradle/gradle.properties <<EOF
+          org.gradle.jvmargs=-Xmx4g
+          kotlin.daemon.jvmargs=-Xmx4g
+          EOF
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 &
+          export DISPLAY=:99
+          ./gradlew -PideProfileName=${{ matrix.ideProfileName }} check coverageReport -x gitSecrets --info --stacktrace --console plain --continue
+
+      - name: Build plugin
+        if: success()
+        run: ./gradlew -PideProfileName=${{ matrix.ideProfileName }} buildPlugin
+
+      - name: Collect test artifacts
+        if: always()
+        run: |
+          mkdir -p /tmp/testArtifacts/test-reports
+          rsync -rmq --include='*/' --include '**/build/idea-sandbox/**/log*/**' --exclude='*' . /tmp/testArtifacts/ || true
+          rsync -rmq --include='*/' --include '**/build/reports/**' --exclude='*' . /tmp/testArtifacts/ || true
+          rsync -rmq --include='*/' --include '**/test-results/**/*.xml' --exclude='*' . /tmp/testArtifacts/test-reports || true
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-test-artifacts-${{ matrix.ideProfileName }}
+          path: /tmp/testArtifacts/
+          retention-days: 14
+
+      - name: Upload plugin artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-plugin-${{ matrix.ideProfileName }}
+          path: plugins/**/build/distributions/*.zip
+          retention-days: 14

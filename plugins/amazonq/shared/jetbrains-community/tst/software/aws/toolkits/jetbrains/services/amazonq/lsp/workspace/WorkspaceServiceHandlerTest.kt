@@ -46,7 +46,6 @@ import org.eclipse.lsp4j.RenameFilesParams
 import org.eclipse.lsp4j.ServerCapabilities
 import org.eclipse.lsp4j.WorkspaceFolder
 import org.eclipse.lsp4j.WorkspaceServerCapabilities
-import org.eclipse.lsp4j.jsonrpc.messages.ResponseMessage
 import org.eclipse.lsp4j.services.TextDocumentService
 import org.eclipse.lsp4j.services.WorkspaceService
 import org.junit.jupiter.api.BeforeEach
@@ -94,9 +93,9 @@ class WorkspaceServiceHandlerTest {
 
         // Mock the LSP service's executeSync method as a suspend function
         coEvery {
-            mockLspService.executeIfRunning<CompletableFuture<ResponseMessage>>(any())
+            mockLspService.executeIfRunning<Any?>(any())
         } coAnswers {
-            val func = firstArg<suspend AmazonQLspService.(AmazonQLanguageServer) -> CompletableFuture<ResponseMessage>>()
+            val func = firstArg<suspend AmazonQLspService.(AmazonQLanguageServer) -> Any?>()
             func.invoke(mockLspService, mockLanguageServer)
         }
 
