@@ -5,7 +5,7 @@ package software.aws.toolkits.jetbrains.services.amazonq.lsp.artifacts
 
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.extensions.PluginId
-import com.intellij.testFramework.HeavyPlatformTestCase
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.text.SemVer
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -21,7 +21,7 @@ import software.aws.toolkits.jetbrains.services.amazonq.lsp.artifacts.ArtifactMa
 import java.nio.file.Files
 import java.nio.file.Path
 
-class ArtifactManagerTest : HeavyPlatformTestCase() {
+class ArtifactManagerTest : BasePlatformTestCase() {
     private lateinit var tempDir: Path
     private lateinit var artifactHelper: ArtifactHelper
     private lateinit var artifactManager: ArtifactManager
