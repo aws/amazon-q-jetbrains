@@ -1,7 +1,4 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
-
-name: Unit Test
+name: Mac Unit Tests
 
 on:
   push:
@@ -10,18 +7,41 @@ on:
     branches: [ main, feature/*, fix/*, test/* ]
 
 jobs:
-  build:
+  mac-tests:
     name: Mac
-
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 21
-      uses: actions/setup-java@v1
-      with:
-        java-version: 21
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew check coverageReport --info --full-stacktrace --console plain
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: corretto
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run tests
+        env:
+          LOCAL_ENV_RUN: true
+          CI: true
+        run: |
+          chmod +x gradlew
+          ./gradlew \
+            -Dorg.gradle.jvmargs=-Xmx4g \
+            coverageReport \
+            --info --stacktrace --console plain --continue
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-mac
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+          retention-days: 14
