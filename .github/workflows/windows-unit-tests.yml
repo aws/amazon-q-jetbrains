@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ideProfileName: [ "2025.1", "2025.2", "2025.3" ]
+        ideProfileName: [ "2025.1", "2025.2", "2025.3", "2026.1" ]
     env:
       CI: true
       LOCAL_ENV_RUN: true
