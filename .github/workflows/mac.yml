@@ -3,9 +3,6 @@
 
 name: Unit Test
 
-permissions:
-  contents: read
-
 on:
   push:
     branches: [ main ]
@@ -14,14 +11,9 @@ on:
 
 jobs:
   build:
-    name: Mac (${{ matrix.version }})
+    name: Mac
 
     runs-on: macos-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        version: [ '2025.3', '2026.1' ]
 
     steps:
     - uses: actions/checkout@v2
@@ -32,4 +24,4 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew check coverageReport --info --full-stacktrace --console plain -PideProfileName=${{ matrix.version }}
+      run: ./gradlew check coverageReport --info --full-stacktrace --console plain
