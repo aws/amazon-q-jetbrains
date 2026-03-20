@@ -44,4 +44,3 @@ Please see [CONTRIBUTING](CONTRIBUTING.md#building-from-source) for instructions
 ## Licensing
 
 The plugin is distributed according to the terms outlined in our [LICENSE](LICENSE).
-
