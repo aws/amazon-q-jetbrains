@@ -23,11 +23,17 @@ import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.eclipse.lsp4j.DidChangeTextDocumentParams
 import org.eclipse.lsp4j.DidCloseTextDocumentParams
 import org.eclipse.lsp4j.DidOpenTextDocumentParams
 import org.eclipse.lsp4j.DidSaveTextDocumentParams
+import org.eclipse.lsp4j.Position
+import org.eclipse.lsp4j.Range
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent
 import org.eclipse.lsp4j.TextDocumentIdentifier
 import org.eclipse.lsp4j.TextDocumentItem
@@ -40,6 +46,7 @@ import software.aws.toolkits.jetbrains.services.amazonq.lsp.AmazonQLspService
 import software.aws.toolkits.jetbrains.services.amazonq.lsp.model.aws.chat.ACTIVE_EDITOR_CHANGED_NOTIFICATION
 import software.aws.toolkits.jetbrains.services.amazonq.lsp.util.LspEditorUtil.getCursorState
 import software.aws.toolkits.jetbrains.services.amazonq.lsp.util.LspEditorUtil.toUriString
+import java.util.concurrent.ConcurrentHashMap
 
 class TextDocumentServiceHandler(
     private val project: Project,
@@ -81,8 +88,18 @@ class TextDocumentServiceHandler(
     private fun handleFileOpened(file: VirtualFile) {
         if (file.getUserData(KEY_REAL_TIME_EDIT_LISTENER) == null) {
             val listener = object : DocumentListener {
+                // Both callbacks fire on the EDT — no synchronization needed.
+                private var preChangeEndPosition: Position = Position(0, 0)
+
+                override fun beforeDocumentChange(event: DocumentEvent) {
+                    // Capture the range end in old-document coordinates BEFORE the edit is applied.
+                    // After the edit, the document's line offsets no longer map correctly for
+                    // multi-line deletions/replacements, so we must snapshot here.
+                    preChangeEndPosition = offsetToPosition(event.document, event.offset + event.oldLength)
+                }
+
                 override fun documentChanged(event: DocumentEvent) {
-                    realTimeEdit(event)
+                    realTimeEdit(event, preChangeEndPosition)
                 }
             }
             val document = ApplicationManager.getApplication().runReadAction<Document?> {
@@ -109,18 +126,27 @@ class TextDocumentServiceHandler(
     }
 
     override fun beforeDocumentSaving(document: Document) {
-        trySendIfValid { languageServer ->
-            val file = FileDocumentManager.getInstance().getFile(document) ?: return@trySendIfValid
-            toUriString(file)?.let { uri ->
-                languageServer.textDocumentService.didSave(
-                    DidSaveTextDocumentParams().apply {
-                        textDocument = TextDocumentIdentifier().apply {
-                            this.uri = uri
+        val file = FileDocumentManager.getInstance().getFile(document) ?: return
+        val uri = toUriString(file) ?: return
+        // Capture text on the calling thread before the coroutine runs.
+        val capturedText = document.text
+
+        // Flush pending changes and then send didSave in the same coroutine so the server
+        // always receives all incremental edits before the save notification.
+        cs.launch {
+            flushPendingChangesForUri(uri)
+            AmazonQLspService.executeAsyncIfRunning(project) { languageServer ->
+                try {
+                    languageServer.textDocumentService.didSave(
+                        DidSaveTextDocumentParams().apply {
+                            textDocument = TextDocumentIdentifier().apply { this.uri = uri }
+                            // TODO: should respect `textDocumentSync.save.includeText` server capability config
+                            text = capturedText
                         }
-                        // TODO: should respect `textDocumentSync.save.includeText` server capability config
-                        text = document.text
-                    }
-                )
+                    )
+                } catch (e: Exception) {
+                    LOG.warn { "Failed to send didSave for $uri: $e" }
+                }
             }
         }
     }
@@ -170,15 +196,22 @@ class TextDocumentServiceHandler(
                 }
             }
 
-            trySendIfValid { languageServer ->
-                toUriString(file)?.let { uri ->
-                    languageServer.textDocumentService.didClose(
-                        DidCloseTextDocumentParams().apply {
-                            textDocument = TextDocumentIdentifier().apply {
-                                this.uri = uri
+            val uri = toUriString(file) ?: return
+
+            // Flush pending changes and then send didClose in the same coroutine so the server
+            // always receives all incremental edits before the close notification.
+            cs.launch {
+                flushPendingChangesForUri(uri)
+                AmazonQLspService.executeAsyncIfRunning(project) { languageServer ->
+                    try {
+                        languageServer.textDocumentService.didClose(
+                            DidCloseTextDocumentParams().apply {
+                                textDocument = TextDocumentIdentifier().apply { this.uri = uri }
                             }
-                        }
-                    )
+                        )
+                    } catch (e: Exception) {
+                        LOG.warn { "Failed to send didClose for $uri: $e" }
+                    }
                 }
             }
         }
@@ -210,29 +243,109 @@ class TextDocumentServiceHandler(
         }
     }
 
-    private fun realTimeEdit(event: DocumentEvent) {
-        trySendIfValid { languageServer ->
-            val vFile = FileDocumentManager.getInstance().getFile(event.document) ?: return@trySendIfValid
-            toUriString(vFile)?.let { uri ->
+    /**
+     * Pending incremental changes per document URI, accumulated between debounce flushes.
+     */
+    private data class PendingChange(
+        val uri: String,
+        val changes: MutableList<TextDocumentContentChangeEvent> = mutableListOf(),
+        var latestVersion: Int = 0,
+    )
+
+    private val pendingChanges = ConcurrentHashMap<String, PendingChange>()
+    private val pendingFlushJobs = ConcurrentHashMap<String, Job>()
+    private val changeMutex = Mutex()
+
+    private fun realTimeEdit(event: DocumentEvent, preChangeEndPosition: Position) {
+        val vFile = FileDocumentManager.getInstance().getFile(event.document) ?: return
+        val uri = toUriString(vFile) ?: return
+
+        val changeEvent = TextDocumentContentChangeEvent().apply {
+            range = Range(
+                // Start offset is before the edit — identical in old and new document coordinates.
+                offsetToPosition(event.document, event.offset),
+                // End position was captured before the edit in beforeDocumentChange; using it here
+                // avoids incorrect line mapping when the replaced text contained newlines.
+                preChangeEndPosition,
+            )
+            text = event.newFragment.toString()
+            rangeLength = event.oldLength
+        }
+        val version = event.document.modificationStamp.toInt()
+
+        cs.launch {
+            changeMutex.withLock {
+                val pending = pendingChanges.getOrPut(uri) { PendingChange(uri) }
+                pending.changes.add(changeEvent)
+                pending.latestVersion = version
+
+                // Cancel any existing flush job for this URI and start a new one
+                pendingFlushJobs[uri]?.cancel()
+                pendingFlushJobs[uri] = cs.launch {
+                    delay(DEBOUNCE_MS)
+                    flushChanges(uri)
+                }
+            }
+        }
+    }
+
+    private suspend fun flushChanges(uri: String) {
+        val pending = changeMutex.withLock {
+            pendingFlushJobs.remove(uri)
+            pendingChanges.remove(uri)
+        } ?: return
+
+        AmazonQLspService.executeAsyncIfRunning(project) { languageServer ->
+            try {
                 languageServer.textDocumentService.didChange(
                     DidChangeTextDocumentParams().apply {
                         textDocument = VersionedTextDocumentIdentifier().apply {
-                            this.uri = uri
-                            version = event.document.modificationStamp.toInt()
+                            this.uri = pending.uri
+                            version = pending.latestVersion
                         }
-                        contentChanges = listOf(
-                            TextDocumentContentChangeEvent().apply {
-                                text = event.document.text
-                            }
-                        )
+                        contentChanges = pending.changes
                     }
                 )
+            } catch (e: Exception) {
+                LOG.warn { "Failed to flush batched didChange for $uri: $e" }
             }
         }
-        // Process document changes here
+    }
+
+    /**
+     * Flushes any pending debounced changes for the given URI immediately.
+     * Called before save and close to ensure the server has up-to-date content.
+     */
+    private suspend fun flushPendingChangesForUri(uri: String) {
+        changeMutex.withLock {
+            pendingFlushJobs.remove(uri)?.cancel()
+        }
+        flushChanges(uri)
+    }
+
+    companion object {
+        private val KEY_REAL_TIME_EDIT_LISTENER = Key.create<DocumentListener>("amazonq.textdocument.realtimeedit.listener")
+        private val LOG = getLogger<TextDocumentServiceHandler>()
+
+        /** Debounce window for batching incremental edits before sending to the LSP server. */
+        internal const val DEBOUNCE_MS = 100L
+
+        /**
+         * Converts an absolute document offset to an LSP [Position] (0-based line and character).
+         */
+        internal fun offsetToPosition(document: Document, offset: Int): Position {
+            val clampedOffset = offset.coerceIn(0, document.textLength)
+            val line = document.getLineNumber(clampedOffset)
+            val character = clampedOffset - document.getLineStartOffset(line)
+            return Position(line, character)
+        }
     }
 
     override fun dispose() {
+        // Cancel all pending flush jobs on disposal
+        pendingFlushJobs.values.forEach { it.cancel() }
+        pendingFlushJobs.clear()
+        pendingChanges.clear()
     }
 
     private fun trySendIfValid(runnable: (AmazonQLanguageServer) -> Unit) {
@@ -245,10 +358,5 @@ class TextDocumentServiceHandler(
                 }
             }
         }
-    }
-
-    companion object {
-        private val KEY_REAL_TIME_EDIT_LISTENER = Key.create<DocumentListener>("amazonq.textdocument.realtimeedit.listener")
-        private val LOG = getLogger<TextDocumentServiceHandler>()
     }
 }
