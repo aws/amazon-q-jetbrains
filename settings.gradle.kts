@@ -49,7 +49,11 @@ dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
         codeArtifactMavenRepo()
-        mavenCentral()
+        mavenCentral() {
+            content {
+                excludeGroup("bundledModule")
+            }
+        }
 
         intellijPlatform {
             defaultRepositories()
