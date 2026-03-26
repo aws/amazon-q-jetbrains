@@ -102,8 +102,8 @@ dependencies {
         plugins(toolkitIntelliJ.productProfile().map { it.marketplacePlugins })
 
         // OAuth modules split in 2025.3 (253) - must be explicitly bundled
-        val versionStr = version.get()
-        if (versionStr.contains("253") || versionStr.contains("261")) {
+        val profileName = providers.gradleProperty("ideProfileName").get()
+        if (profileName >= "2025.3") {
             bundledModule("intellij.platform.collaborationTools")
             bundledModule("intellij.platform.collaborationTools.auth.base")
             bundledModule("intellij.platform.collaborationTools.auth")
