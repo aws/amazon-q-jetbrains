@@ -224,10 +224,8 @@ class TextDocumentServiceHandler(
                         }
                         contentChanges = listOf(
                             TextDocumentContentChangeEvent().apply {
-                                range = Range(
-                                    offsetToPosition(event.document, event.offset),
-                                    offsetToPosition(event.document, event.offset + event.oldLength)
-                                )
+                                val startPos = offsetToPosition(event.document, event.offset)
+                                range = Range(startPos, advancePosition(startPos, event.oldFragment))
                                 text = event.newFragment.toString()
                                 rangeLength = event.oldLength
                             }
@@ -249,6 +247,25 @@ class TextDocumentServiceHandler(
             val clampedOffset = offset.coerceIn(0, document.textLength)
             val line = document.getLineNumber(clampedOffset)
             val character = clampedOffset - document.getLineStartOffset(line)
+            return Position(line, character)
+        }
+
+        /**
+         * Advances [start] by the content of [text], returning the resulting LSP [Position].
+         * Uses the old fragment directly so callers don't need the post-change document.
+         * IntelliJ documents normalise line endings to '\n', so only '\n' is checked.
+         */
+        internal fun advancePosition(start: Position, text: CharSequence): Position {
+            var line = start.line
+            var character = start.character
+            for (ch in text) {
+                if (ch == '\n') {
+                    line++
+                    character = 0
+                } else {
+                    character++
+                }
+            }
             return Position(line, character)
         }
     }
