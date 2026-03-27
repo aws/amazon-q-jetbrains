@@ -48,7 +48,7 @@ jobs:
         run: |
           Xvfb :99 -screen 0 1920x1080x24 &
           export DISPLAY=:99
-          ./gradlew -PideProfileName=${{ matrix.ideProfileName }} check coverageReport -x gitSecrets --info --stacktrace --console plain --continue
+          ./gradlew -PideProfileName=${{ matrix.ideProfileName }} check coverageReport -x gitSecrets --stacktrace --console plain --continue
 
       - name: Build plugin
         if: success()
