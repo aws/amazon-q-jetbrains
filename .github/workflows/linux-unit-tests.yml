@@ -13,7 +13,6 @@ jobs:
   linux-unit-tests:
     name: Linux (${{ matrix.ideProfileName }})
     runs-on: ubuntu-latest
-    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
