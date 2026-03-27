@@ -61,10 +61,11 @@ dependencies {
     intellijPlatform {
         val version = ideProfile.community.sdkVersion
         // Use unified IntelliJ IDEA for 2025.3+, Community for older versions
-        if (version.startsWith("2025.3")) {
-            intellijIdeaUltimate(version, !version.contains("SNAPSHOT"))
+        val useInstaller = false
+        if (version.startsWith("2025.3") || version.startsWith("2026.")) {
+            intellijIdeaUltimate(version, useInstaller)
         } else {
-            intellijIdeaCommunity(version, !version.contains("SNAPSHOT"))
+            intellijIdeaCommunity(version, useInstaller)
         }
 
         testImplementation(project(":plugin-core-q:core-q"))

@@ -153,11 +153,11 @@ object IdeVersions {
         Profile(
             name = "2026.1",
             gateway = ProductProfile(
-                sdkVersion = "261.22158-EAP-CANDIDATE-SNAPSHOT",
+                sdkVersion = "2026.1",
                 bundledPlugins = listOf("org.jetbrains.plugins.terminal")
             ),
             community = ProductProfile(
-                sdkVersion = "261.22158-EAP-CANDIDATE-SNAPSHOT",
+                sdkVersion = "2026.1",
                 bundledPlugins = commonPlugins + listOf(
                     "com.intellij.java",
                     "com.intellij.gradle",
@@ -165,27 +165,27 @@ object IdeVersions {
                     "com.intellij.properties"
                 ),
                 marketplacePlugins = listOf(
-                    "org.toml.lang:261.22158.36",
-                    "PythonCore:261.22158.46",
-                    "Docker:261.22158.45",
-                    "com.intellij.modules.json:261.22158.46"
+                    "org.toml.lang:261.22158.185",
+                    "PythonCore:261.22158.277",
+                    "Docker:261.22158.195",
+                    "com.intellij.modules.json:261.22158.182"
                 )
             ),
             ultimate = ProductProfile(
-                sdkVersion = "261.22158-EAP-CANDIDATE-SNAPSHOT",
+                sdkVersion = "2026.1",
                 bundledPlugins = commonPlugins + listOf(
                     "JavaScript",
                     "JavaScriptDebugger",
                     "com.intellij.database"
                 ),
                 marketplacePlugins = listOf(
-                    "Pythonid:261.22158.46",
-                    "org.jetbrains.plugins.go:261.22158.46",
-                    "com.intellij.modules.json:261.22158.46"
+                    "Pythonid:261.22158.277",
+                    "org.jetbrains.plugins.go:261.22158.277",
+                    "com.intellij.modules.json:261.22158.182"
                 )
             ),
             rider = RiderProfile(
-                sdkVersion = "2026.1-SNAPSHOT",
+                sdkVersion = "2026.1",
                 bundledPlugins = commonPlugins,
                 netFrameworkTarget = "net472",
                 rdGenVersion = "2026.1.3",
