@@ -28,6 +28,8 @@ import org.eclipse.lsp4j.DidChangeTextDocumentParams
 import org.eclipse.lsp4j.DidCloseTextDocumentParams
 import org.eclipse.lsp4j.DidOpenTextDocumentParams
 import org.eclipse.lsp4j.DidSaveTextDocumentParams
+import org.eclipse.lsp4j.Position
+import org.eclipse.lsp4j.Range
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent
 import org.eclipse.lsp4j.TextDocumentIdentifier
 import org.eclipse.lsp4j.TextDocumentItem
@@ -222,14 +224,50 @@ class TextDocumentServiceHandler(
                         }
                         contentChanges = listOf(
                             TextDocumentContentChangeEvent().apply {
-                                text = event.document.text
+                                val startPos = offsetToPosition(event.document, event.offset)
+                                range = Range(startPos, advancePosition(startPos, event.oldFragment))
+                                text = event.newFragment.toString()
+                                rangeLength = event.oldLength
                             }
                         )
                     }
                 )
             }
         }
-        // Process document changes here
+    }
+
+    companion object {
+        private val KEY_REAL_TIME_EDIT_LISTENER = Key.create<DocumentListener>("amazonq.textdocument.realtimeedit.listener")
+        private val LOG = getLogger<TextDocumentServiceHandler>()
+
+        /**
+         * Converts an absolute document offset to an LSP [Position] (0-based line and character).
+         */
+        internal fun offsetToPosition(document: Document, offset: Int): Position {
+            val clampedOffset = offset.coerceIn(0, document.textLength)
+            val line = document.getLineNumber(clampedOffset)
+            val character = clampedOffset - document.getLineStartOffset(line)
+            return Position(line, character)
+        }
+
+        /**
+         * Advances [start] by the content of [text], returning the resulting LSP [Position].
+         * Uses the old fragment directly so callers don't need the post-change document.
+         * IntelliJ documents normalise line endings to '\n', so only '\n' is checked.
+         */
+        internal fun advancePosition(start: Position, text: CharSequence): Position {
+            var line = start.line
+            var character = start.character
+            for (ch in text) {
+                if (ch == '\n') {
+                    line++
+                    character = 0
+                } else {
+                    character++
+                }
+            }
+            return Position(line, character)
+        }
     }
 
     override fun dispose() {
@@ -245,10 +283,5 @@ class TextDocumentServiceHandler(
                 }
             }
         }
-    }
-
-    companion object {
-        private val KEY_REAL_TIME_EDIT_LISTENER = Key.create<DocumentListener>("amazonq.textdocument.realtimeedit.listener")
-        private val LOG = getLogger<TextDocumentServiceHandler>()
     }
 }
